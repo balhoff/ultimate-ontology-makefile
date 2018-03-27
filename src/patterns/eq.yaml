@@ -1,0 +1,30 @@
+pattern_name: eq
+
+description: "EQ phenotype"
+
+classes:
+  quality: PATO:0000001
+  phenotype: FOO:0000001
+  Thing: owl:Thing
+
+relations:
+  inheres_in: RO:0000052
+
+vars:
+  entity: Thing
+  quality: quality
+
+name:
+  text: "%s %s"
+  vars:
+    - entity
+    - quality
+
+equivalentTo:
+  text: "%s and (inheres_in some %s)"
+  vars:
+    - quality
+    - entity
+
+subClassOf:
+  text: phenotype

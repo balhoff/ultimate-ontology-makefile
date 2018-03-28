@@ -15,6 +15,7 @@ ROBOT= $(ROBOT_ENV) robot
 all: $(PRODUCTS)/$(ONT).owl $(PRODUCTS)/$(ONT)/atomic/$(ONT).owl
 
 $(PRODUCTS)/$(ONT).owl: $(ONT_DIR)/$(ONT)-edit.ofn target/$(ONT)-edit-imports.ofn
+	# Need robot to remove imports
 	$(ROBOT) merge -i $< reason reduce annotate --ontology-iri $(PREFIX)/$(ONT).owl --version-iri $(RELEASEPREFIX)/$(ONT).owl -o $@
 
 $(PRODUCTS)/$(ONT)/atomic/$(ONT).owl: $(ONT_DIR)/$(ONT)-edit.ofn

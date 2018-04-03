@@ -14,16 +14,16 @@ ROBOT= $(ROBOT_ENV) robot
 
 all: $(PRODUCTS)/$(ONT).owl $(PRODUCTS)/$(ONT)/atomic/$(ONT).owl
 
-$(PRODUCTS)/$(ONT).owl: $(ONT_DIR)/$(ONT)-edit.ofn target/$(ONT)-edit-imports.ofn
+$(PRODUCTS)/$(ONT).owl: $(IMS)/$(ONT)-merged.ofn target/$(ONT)-edit-imports.ofn
 	# robot merge will automatically remove imports
 	$(ROBOT) merge -i $< reason reduce annotate --ontology-iri $(PREFIX)/$(ONT).owl --version-iri $(RELEASEPREFIX)/$(ONT).owl -o $@
 
-$(PRODUCTS)/$(ONT)/atomic/$(ONT).owl: $(ONT_DIR)/$(ONT)-edit.ofn
+$(PRODUCTS)/$(ONT)/atomic/$(ONT).owl: $(IMS)/$(ONT)-merged.ofn
 	# Need robot to remove imports
 	mkdir -p $(PRODUCTS)/$(ONT)/atomic &&\
 	$(ROBOT) annotate -i $< --ontology-iri $(PREFIX)/atomic/$(ONT).owl --version-iri $(RELEASEPREFIX)/atomic/$(ONT).owl -o $@
 
-$(IMS)/$(ONT)-merged.ofn: $(ONT_DIR)/$(ONT)-edit.ofn $(pattern_modules) target/$(ONT)-edit-imports.ofn
+$(IMS)/$(ONT)-merged.ofn: $(ONT_DIR)/$(ONT)-edit.ofn target/$(ONT)-edit-imports.ofn $(pattern_modules)
 	# Need robot to not merge imports
 	$(ROBOT) merge -i $(ONT_DIR)/$(ONT)-edit.ofn $(addprefix -i , $(pattern_modules)) -o $@
 

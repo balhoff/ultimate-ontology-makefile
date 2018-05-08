@@ -8,6 +8,7 @@ Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
 
 Ontology(<http://purl.obolibrary.org/obo/foo.owl>
 Import(<https://github.com/obophenotype/foo-ontology/foo-edit-imports.ofn>)
+Import(<https://github.com/obophenotype/foo-ontology/foo-patterns.ofn>)
 
 Declaration(Class(<http://purl.obolibrary.org/obo/FOO_0000001>))
 

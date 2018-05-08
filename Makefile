@@ -23,15 +23,27 @@ $(PRODUCTS)/$(ONT)/atomic/$(ONT).owl: $(IMS)/$(ONT)-merged.ofn
 	mkdir -p $(PRODUCTS)/$(ONT)/atomic &&\
 	$(ROBOT) annotate -i $< --ontology-iri $(PREFIX)/atomic/$(ONT).owl --version-iri $(RELEASEPREFIX)/atomic/$(ONT).owl -o $@
 
-$(IMS)/$(ONT)-merged.ofn: $(ONT_DIR)/$(ONT)-edit.ofn target/$(ONT)-edit-imports.ofn $(pattern_modules)
+$(IMS)/$(ONT)-merged.ofn: $(ONT_DIR)/$(ONT)-edit.ofn target/$(ONT)-edit-imports.ofn target/patterns.ofn
 	# Need robot to not merge imports
-	$(ROBOT) merge -i $(ONT_DIR)/$(ONT)-edit.ofn $(addprefix -i , $(pattern_modules)) -o $@
+	$(ROBOT) merge -i $(ONT_DIR)/$(ONT)-edit.ofn -i target/patterns.ofn -o $@
 
 pattern_modules := $(patsubst %.yaml, $(IMS)/patterns/%.ofn, $(notdir $(wildcard src/patterns/*.yaml)))
 
-$(IMS)/patterns/%.ofn: src/patterns/%.yaml src/patterns/%.tsv
+pattern_term_lists := $(patsubst %.yaml, $(IMS)/patterns/%.txt, $(notdir $(wildcard src/patterns/*.yaml)))
+
+$(IMS)/patterns/%.ofn: src/patterns/%.yaml src/patterns/%.tsv target/$(ONT)-edit-imports.ofn $(ONT_DIR)/$(ONT)-edit.ofn
 	mkdir -p $(IMS)/patterns &&\
-	dosdp-tools generate --infile=$(word 2, $^) --template=$< --obo-prefixes=true --outfile=$@
+	dosdp-tools generate --catalog=$(UTIL)/catalog-v001-patterngen.xml --infile=$(word 2, $^) --template=$< --ontology=$(ONT_DIR)/$(ONT)-edit.ofn --obo-prefixes=true --outfile=$@
+
+target/patterns.ofn: $(pattern_modules)
+	$(ROBOT) merge $(addprefix -i , $(pattern_modules)) annotate --ontology-iri $(PREFIX)/$(ONT)-patterns.ofn -o $@
+
+$(IMS)/patterns/%.txt: src/patterns/%.yaml src/patterns/%.tsv
+	mkdir -p $(IMS)/patterns &&\
+	dosdp-tools terms --infile=$(word 2, $^) --template=$< --obo-prefixes=true --outfile=$@
+
+$(IMS)/all_pattern_terms.txt: $(pattern_term_lists)
+	cat $^ | sort | uniq >$@
 
 target/$(ONT)-edit-imports.ofn: $(ONT_DIR)/$(ONT)-edit-imports.ofn target/terms.txt $(MIRROR)
 	ln -f $(ONT_DIR)/$(ONT)-edit-imports.ofn $(MIRROR)/$(ONT)-edit-imports.ofn &&\
@@ -41,7 +53,7 @@ $(MIRROR): $(ONT_DIR)/$(ONT)-edit-imports.ofn
 	rm -rf $@ &&\
 	$(ROBOT) mirror -i $< -d target/mirror -o target/mirror/catalog-v001.xml
 
-target/terms.txt: $(ONT_DIR)/$(ONT)-edit.ofn $(ONT_DIR)/import-requests.txt $(pattern_modules)
+target/terms.txt: $(ONT_DIR)/$(ONT)-edit.ofn $(ONT_DIR)/import-requests.txt $(IMS)/all_pattern_terms.txt
 	# The links are needed because robot doesn't allow direct specification of a catalog file.
 	# The "empty" files are needed because we need to query terms from the ontology without trying
 	# to load imports, which haven't been created yet--don't use $(IMS)/$(ONT)-merged.ofn here.
@@ -49,8 +61,8 @@ target/terms.txt: $(ONT_DIR)/$(ONT)-edit.ofn $(ONT_DIR)/import-requests.txt $(pa
 	ln -f $< $(IMS)/$(ONT)-edit.ofn &&\
 	ln -f $(UTIL)/empty.ofn $(IMS)/empty.ofn  &&\
 	ln -f $(UTIL)/catalog-v001.xml.empty $(IMS)/catalog-v001.xml &&\
-	$(ROBOT) merge -i $(IMS)/$(ONT)-edit.ofn $(addprefix -i , $(pattern_modules)) query -f csv --select src/sparql/terms.sparql $@ &&\
-	cat $(ONT_DIR)/import-requests.txt >>$@
+	$(ROBOT) query -i $(IMS)/$(ONT)-edit.ofn -f csv --select src/sparql/terms.sparql $(IMS)/edit-terms.txt &&\
+	cat $(IMS)/edit-terms.txt $(ONT_DIR)/import-requests.txt $(IMS)/all_pattern_terms.txt | sort | uniq >$@
 
 clean:
 	rm -rf target

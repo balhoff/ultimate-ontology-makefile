@@ -3,6 +3,7 @@
 
   <!-- generated mapping -->
   <uri name="https://github.com/obophenotype/foo-ontology/foo-edit-imports.ofn"  uri="empty.ofn"/>
+  <uri name="https://github.com/obophenotype/foo-ontology/foo-patterns.ofn"  uri="empty.ofn"/>
 
 </catalog>
 

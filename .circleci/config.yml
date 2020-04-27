@@ -1,0 +1,8 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: 'obolibrary/odkfull:v1.2.22'
+    steps:
+      - checkout
+      - run: echo 'hello world'

@@ -3,6 +3,9 @@ jobs:
   build:
     docker:
       - image: 'obolibrary/odkfull:v1.2.22'
+    resource_class: medium
     steps:
       - checkout
       - run: echo 'hello world'
+      - run: pwd; ls
+      - run: make ROBOT_ENV='ROBOT_JAVA_ARGS=-Xmx10G' target/patterns.ofn

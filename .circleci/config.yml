@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: 'obolibrary/odkfull:v1.2.22'
-    resource_class: large
+    resource_class: medium
     steps:
       - checkout
       - run: echo 'hello world'

@@ -7,4 +7,5 @@ jobs:
     steps:
       - checkout
       - run: echo 'hello world'
+      - run: pwd; ls
       - run: make ROBOT_ENV='ROBOT_JAVA_ARGS=-Xmx10G' target/patterns.ofn
